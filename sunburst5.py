@@ -42,7 +42,7 @@ if uploaded_file is not None:
     )
 
     # Optional: reverse color if you want red = higher
-    fig.update_traces(maxdepth=1, reversescale=False)
+    fig.update_traces(maxdepth=2, reversescale=False)
 
     # Display
     st.plotly_chart(fig)
