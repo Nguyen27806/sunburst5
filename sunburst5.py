@@ -36,7 +36,7 @@ if uploaded_file is not None:
     )
 
     # Show only the first ring (Entrepreneurship) initially
-    fig.update_traces(maxdepth=1)
+    fig.update_traces(maxdepth=2)
 
     # Display the chart
     st.plotly_chart(fig)
