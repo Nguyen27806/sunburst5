@@ -61,7 +61,7 @@ if uploaded_file is not None:
     fig.update_coloraxes(cmin=0, cmax=100, colorbar_title="Percentage (%)")
 
     # Ban đầu chỉ hiển thị vòng đầu
-    fig.update_traces(maxdepth=1)
+    fig.update_traces(maxdepth=2)
 
     # Hiển thị biểu đồ
     st.plotly_chart(fig)
