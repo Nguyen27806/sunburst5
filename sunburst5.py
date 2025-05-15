@@ -55,6 +55,6 @@ if uploaded_file is not None:
         title='Entrepreneurship → Field → Salary (with Split-Line % Labels)'
     )
 
-    fig.update_traces(maxdepth=1)
+    fig.update_traces(maxdepth=2)
 
     st.plotly_chart(fig)
