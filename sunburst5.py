@@ -57,6 +57,6 @@ if uploaded_file is not None:
         title='Entrepreneurship → Field → Salary (with % at Root Level)'
     )
 
-    fig.update_traces(maxdepth=2)
+    fig.update_traces(maxdepth=1)
 
     st.plotly_chart(fig)
