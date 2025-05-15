@@ -24,19 +24,8 @@ if uploaded_file is not None:
 
     df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-    # Group data for sunburst with new order
+    # Group data
     sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 
-    # Create sunburst chart with new path order
+    # Create sunburst chart with color scale
     fig = px.sunburst(
-        sunburst_data,
-        path=['Entrepreneurship', 'Field_of_Study', 'Salary_Group'],
-        values='Count',
-        title='Entrepreneurship → Field → Starting Salary'
-    )
-
-    # Show only the first ring (Entrepreneurship) initially
-    fig.update_traces(maxdepth=2)
-
-    # Display the chart
-    st.plotly_chart(fig)
