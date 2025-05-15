@@ -3,16 +3,16 @@ import pandas as pd
 import plotly.express as px
 
 # Title
-st.title("Sunburst Chart: Entrepreneurship → Field → Salary (Full % Labels + Fixed Color Scale)")
+st.title("Sunburst Chart: Entrepreneurship → Field → Salary (All Levels Colored by %)")
 
 # Upload file
 uploaded_file = st.file_uploader("Upload the Excel file", type="xlsx")
 
 if uploaded_file is not None:
-    # Đọc dữ liệu
+    # Load data
     df = pd.read_excel(uploaded_file, sheet_name='education_career_success')
 
-    # Phân loại mức lương
+    # Categorize salary
     def categorize_salary(salary):
         if salary < 30000:
             return '<30K'
@@ -25,43 +25,43 @@ if uploaded_file is not None:
 
     df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-    # Gom nhóm dữ liệu
+    # Group and count
     sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 
-    # Tính phần trăm trên tổng
+    # Tổng tất cả
     total = sunburst_data['Count'].sum()
     sunburst_data['Percentage'] = (sunburst_data['Count'] / total * 100).round(2)
 
-    # ======= Gắn nhãn có phần trăm cho từng vòng ========
+    # Tính % cho từng node cha (Yes/No + Field)
+    root_percent = sunburst_data.groupby('Entrepreneurship')['Count'].sum().reset_index()
+    root_percent['Root_Percentage'] = (root_percent['Count'] / total * 100).round(2)
 
-    # Vòng 1: Entrepreneurship (1 dòng)
-    sunburst_data['Entrepreneurship_Label'] = sunburst_data['Entrepreneurship'] + ' (' + (
-        sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total * 100, 1)).astype(str)
-    ) + '%)'
+    field_percent = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].sum().reset_index()
+    field_percent['Field_Percentage'] = (field_percent['Count'] / total * 100).round(2)
 
-    # Vòng 2: Field (2 dòng)
-    sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '\n' + (
-        sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total * 100, 1)).astype(str)
-    ) + '%'
+    # Merge vào dataframe
+    sunburst_data = sunburst_data.merge(root_percent[['Entrepreneurship', 'Root_Percentage']], on='Entrepreneurship')
+    sunburst_data = sunburst_data.merge(field_percent, on=['Entrepreneurship', 'Field_of_Study'])
 
-    # Vòng 3: Salary_Group (2 dòng)
+    # Label
+    sunburst_data['Entrepreneurship_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Root_Percentage'].astype(str) + '%)'
+    sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '\n' + sunburst_data['Field_Percentage'].astype(str) + '%'
     sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n' + sunburst_data['Percentage'].astype(str) + '%'
 
-    # ======= Vẽ biểu đồ ========
+    # Gán color thủ công (ưu tiên leaf → field → root)
+    sunburst_data['Color_Value'] = sunburst_data['Percentage']
+
+    # Tạo sunburst
     fig = px.sunburst(
         sunburst_data,
         path=['Entrepreneurship_Label', 'Field_Label', 'Salary_Label'],
         values='Percentage',
-        color='Percentage',
+        color='Color_Value',
         color_continuous_scale='RdBu',
-        title='Entrepreneurship → Field → Starting Salary (with % Labels)'
+        title='Entrepreneurship → Field → Salary (All Colored by Percentage)'
     )
 
-    # Cố định scale màu từ 0 đến 100
     fig.update_coloraxes(cmin=0, cmax=100, colorbar_title="Percentage (%)")
-
-    # Ban đầu chỉ hiển thị vòng đầu
     fig.update_traces(maxdepth=2)
 
-    # Hiển thị biểu đồ
     st.plotly_chart(fig)
