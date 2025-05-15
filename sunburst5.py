@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # Title
-st.title("Sunburst Chart: Entrepreneurship → Field → Starting Salary (by Percentage 0–100)")
+st.title("Sunburst Chart: Entrepreneurship → Field → Starting Salary (with RdBu Color)")
 
 # Upload Excel file
 uploaded_file = st.file_uploader("Upload the Excel file", type="xlsx")
@@ -24,25 +24,25 @@ if uploaded_file is not None:
 
     df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-    # Group and calculate count
+    # Group and calculate counts
     sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 
-    # Calculate percentage on a 0–100 scale
+    # Calculate percentage (0–100)
     total = sunburst_data['Count'].sum()
     sunburst_data['Percentage'] = (sunburst_data['Count'] / total) * 100
 
-    # Create sunburst chart using Percentage
+    # Create sunburst chart
     fig = px.sunburst(
         sunburst_data,
         path=['Entrepreneurship', 'Field_of_Study', 'Salary_Group'],
         values='Percentage',
         color='Percentage',
         color_continuous_scale='RdBu',
-        title='Entrepreneurship → Field → Starting Salary (Percentage-Based)'
+        title='Entrepreneurship → Field → Starting Salary (by Percentage)'
     )
 
-    # Limit initial view to top level only
-    fig.update_traces(maxdepth=2)
+    # Optional: reverse color if you want red = higher
+    fig.update_traces(maxdepth=1, reversescale=False)
 
-    # Display the chart
+    # Display
     st.plotly_chart(fig)
