@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # Title
-st.title("Explore Starting Salary by Field and Entrepreneurship")
+st.title("Sunburst Chart: Field → Entrepreneurship → Starting Salary")
 
 # Upload Excel file
 uploaded_file = st.file_uploader("Upload the Excel file", type="xlsx")
@@ -24,30 +24,20 @@ if uploaded_file is not None:
 
     df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-    # Step 1: Select Field
-    selected_field = st.selectbox("Choose a Field of Study", sorted(df['Field_of_Study'].unique()))
+    # Group data for sunburst
+    sunburst_data = df.groupby(['Field_of_Study', 'Entrepreneurship', 'Salary_Group']).size().reset_index(name='Count')
 
-    # Filter for selected field
-    filtered_df = df[df['Field_of_Study'] == selected_field]
-
-    # Step 2: Select Entrepreneurship Option
-    selected_entrepreneurship = st.selectbox(
-        "Choose Entrepreneurship Status",
-        sorted(filtered_df['Entrepreneurship'].unique())
-    )
-
-    # Filter again
-    final_df = filtered_df[filtered_df['Entrepreneurship'] == selected_entrepreneurship]
-
-    # Group data for sunburst (last layer only: Salary Group)
-    sunburst_data = final_df.groupby(['Field_of_Study', 'Entrepreneurship', 'Salary_Group']).size().reset_index(name='Count')
-
-    # Create sunburst chart (now show all 3 levels)
+    # Create sunburst chart
     fig = px.sunburst(
         sunburst_data,
         path=['Field_of_Study', 'Entrepreneurship', 'Salary_Group'],
         values='Count',
-        title=f"{selected_field} → {selected_entrepreneurship} → Starting Salary"
+        title='Field → Entrepreneurship → Starting Salary'
     )
 
+    # ✅ Hiển thị ban đầu chỉ vòng 1 – click để mở tiếp
+    fig.update_traces(maxdepth=1)
+
+    # Display the chart
     st.plotly_chart(fig)
+
