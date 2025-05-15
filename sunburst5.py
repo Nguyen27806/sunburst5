@@ -3,7 +3,7 @@ import pandas as pd
 import plotly.express as px
 
 # Title
-st.title("Sunburst Chart: Entrepreneurship → Field → Starting Salary (with RdBu Color)")
+st.title("Sunburst Chart: Entrepreneurship → Field → Starting Salary (Yes = Blue, No = Red)")
 
 # Upload Excel file
 uploaded_file = st.file_uploader("Upload the Excel file", type="xlsx")
@@ -24,25 +24,24 @@ if uploaded_file is not None:
 
     df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-    # Group and calculate counts
+    # Group and count
     sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 
-    # Calculate percentage (0–100)
-    total = sunburst_data['Count'].sum()
-    sunburst_data['Percentage'] = (sunburst_data['Count'] / total) * 100
-
-    # Create sunburst chart
+    # Create sunburst with custom color per 'Entrepreneurship'
     fig = px.sunburst(
         sunburst_data,
         path=['Entrepreneurship', 'Field_of_Study', 'Salary_Group'],
-        values='Percentage',
-        color='Percentage',
-        color_continuous_scale='RdBu',
-        title='Entrepreneurship → Field → Starting Salary (by Percentage)'
+        values='Count',
+        color='Entrepreneurship',  # Color by top level
+        color_discrete_map={
+            'Yes': 'blue',
+            'No': 'red'
+        },
+        title='Entrepreneurship → Field → Starting Salary'
     )
 
-    # Optional: reverse color if you want red = higher
-    fig.update_traces(maxdepth=2, reversescale=False)
+    # Show only first level at start
+    fig.update_traces(maxdepth=1)
 
-    # Display
+    # Display chart
     st.plotly_chart(fig)
