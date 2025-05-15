@@ -48,7 +48,7 @@ if uploaded_file is not None:
     )
 
     # Ban đầu chỉ hiện vòng 1
-    fig.update_traces(maxdepth=1)
+    fig.update_traces(maxdepth=2)
 
     # Hiển thị biểu đồ
     st.plotly_chart(fig)
