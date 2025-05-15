@@ -29,3 +29,16 @@ if uploaded_file is not None:
 
     # Create sunburst chart with color scale
     fig = px.sunburst(
+        sunburst_data,
+        path=['Entrepreneurship', 'Field_of_Study', 'Salary_Group'],
+        values='Count',
+        color='Count',  # use Count to apply color scale
+        color_continuous_scale='RdBu',
+        title='Entrepreneurship → Field → Starting Salary'
+    )
+
+    # Show only first level initially
+    fig.update_traces(maxdepth=1)
+
+    # Display the chart
+    st.plotly_chart(fig)
