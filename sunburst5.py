@@ -35,4 +35,9 @@ if uploaded_file is not None:
         title='Field → Entrepreneurship → Starting Salary'
     )
 
+    # Limit initial display depth to only the first level
+    fig.update_traces(maxdepth=1)
+
+    # Display the chart
     st.plotly_chart(fig)
+
