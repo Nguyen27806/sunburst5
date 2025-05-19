@@ -42,20 +42,24 @@ if uploaded_file is not None:
         sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n' + sunburst_data['Percentage'].astype(str) + '%'
 
         if color_mode == "Color by Salary Group":
-            # Tạo các tone cho YES (xanh ombre)
+            # YES = Greens
             yes_fields = sunburst_data[sunburst_data['Entrepreneurship'] == 'Yes']['Field_of_Study'].unique()
             yes_colors = px.colors.sample_colorscale("Greens", [i / len(yes_fields) for i in range(len(yes_fields))])
             field_color_map = {('Yes', field): yes_colors[i] for i, field in enumerate(yes_fields)}
 
-            # Tất cả NO sẽ dùng màu đỏ giống nhau hoặc cùng tone đỏ
-            no_color_scale = px.colors.sample_colorscale("Reds", [0.4, 0.5, 0.6, 0.7, 0.8])  # chọn vài màu dịu
+            # NO = custom red palette (from image)
+            custom_red_palette = [
+                "#F8B5B5", "#F78C8C", "#F65C5C", "#F43131", "#F20000",
+                "#DB8A8A", "#DA6363", "#D63C3C", "#D11111", "#BD0000",
+                "#B36C6C", "#B34646", "#B01F1F", "#9C0000", "#860000"
+            ]
             no_fields = sunburst_data[sunburst_data['Entrepreneurship'] == 'No']['Field_of_Study'].unique()
             for i, field in enumerate(no_fields):
-                field_color_map[('No', field)] = no_color_scale[i % len(no_color_scale)]  # lặp lại nếu quá số màu
+                field_color_map[('No', field)] = custom_red_palette[i % len(custom_red_palette)]
 
+            # Assign blended color
             def assign_color(row):
-                key = (row['Entrepreneurship'], row['Field_of_Study'])
-                return field_color_map.get(key, '#DDDDDD')
+                return field_color_map.get((row['Entrepreneurship'], row['Field_of_Study']), "#DDDDDD")
 
             sunburst_data['Color_Assign'] = sunburst_data.apply(assign_color, axis=1)
 
@@ -65,7 +69,7 @@ if uploaded_file is not None:
                 values='Percentage',
                 color=sunburst_data['Color_Assign'],
                 color_discrete_map=dict(zip(sunburst_data['Color_Assign'], sunburst_data['Color_Assign'])),
-                title='🌿 Tone-Based Coloring: Yes = Green Ombre | No = Full Red Tone'
+                title='🌿 Color by Salary Group (Green for Yes, Red for No)'
             )
 
         else:
