@@ -57,6 +57,6 @@ if uploaded_file is not None:
         )
 
         fig.update_coloraxes(cmin=0, cmax=100, colorbar_title="Percentage (%)")
-        fig.update_traces(maxdepth=1, branchvalues="total")
+        fig.update_traces(maxdepth=2, branchvalues="total")
 
         st.plotly_chart(fig)
