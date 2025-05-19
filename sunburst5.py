@@ -42,37 +42,32 @@ if uploaded_file is not None:
         sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n' + sunburst_data['Percentage'].astype(str) + '%'
 
         if color_mode == "Color by Salary Group":
-            # Các tone ombre cho Yes và No
+            # Tạo các tone cho YES (xanh ombre)
             yes_fields = sunburst_data[sunburst_data['Entrepreneurship'] == 'Yes']['Field_of_Study'].unique()
+            yes_colors = px.colors.sample_colorscale("Greens", [i / len(yes_fields) for i in range(len(yes_fields))])
+            field_color_map = {('Yes', field): yes_colors[i] for i, field in enumerate(yes_fields)}
+
+            # Tất cả NO sẽ dùng màu đỏ giống nhau hoặc cùng tone đỏ
+            no_color_scale = px.colors.sample_colorscale("Reds", [0.4, 0.5, 0.6, 0.7, 0.8])  # chọn vài màu dịu
             no_fields = sunburst_data[sunburst_data['Entrepreneurship'] == 'No']['Field_of_Study'].unique()
-
-            # Ombre xanh cho Yes
-            yes_colors = px.colors.sample_colorscale("Greens", [i/len(yes_fields) for i in range(len(yes_fields))])
-            no_colors = px.colors.sample_colorscale("Reds", [i/len(no_fields) for i in range(len(no_fields))])
-
-            field_color_map = {}
-
-            for i, field in enumerate(yes_fields):
-                field_color_map[('Yes', field)] = yes_colors[i]
             for i, field in enumerate(no_fields):
-                field_color_map[('No', field)] = no_colors[i]
+                field_color_map[('No', field)] = no_color_scale[i % len(no_color_scale)]  # lặp lại nếu quá số màu
 
-            # Gán màu
             def assign_color(row):
                 key = (row['Entrepreneurship'], row['Field_of_Study'])
                 return field_color_map.get(key, '#DDDDDD')
 
             sunburst_data['Color_Assign'] = sunburst_data.apply(assign_color, axis=1)
 
-            # Tạo biểu đồ
             fig = px.sunburst(
                 sunburst_data,
                 path=['Entrepreneurship_Label', 'Field_Label', 'Salary_Label'],
                 values='Percentage',
                 color=sunburst_data['Color_Assign'],
                 color_discrete_map=dict(zip(sunburst_data['Color_Assign'], sunburst_data['Color_Assign'])),
-                title='🌿 Tone-Based Coloring by Field and Yes/No'
+                title='🌿 Tone-Based Coloring: Yes = Green Ombre | No = Full Red Tone'
             )
+
         else:
             fig = px.sunburst(
                 sunburst_data,
