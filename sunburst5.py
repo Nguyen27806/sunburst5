@@ -35,9 +35,9 @@ sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round
 sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 
-sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Ent_Label'].astype(str) + '%)'
-sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + ' (' + sunburst_data['Field_Label'].astype(str) + '%)'
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + ' (' + sunburst_data['Percentage'].astype(str) + '%)'
+sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + '<br>' + sunburst_data['Ent_Label'].astype(str) + '%'
+sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '<br>' + sunburst_data['Field_Label'].astype(str) + '%'
+sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '<br>' + sunburst_data['Percentage'].astype(str) + '%'
 
 sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
 
@@ -85,10 +85,10 @@ fig.update_traces(
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
 
-# Enlarge the chart
 fig.update_layout(
-    margin=dict(t=50, l=10, r=10, b=10),
-    height=800
+    width=500,
+    height=500,
+    margin=dict(t=50, l=0, r=0, b=0)
 )
 
 col1, col2 = st.columns([3, 1])
@@ -100,11 +100,13 @@ with col2:
     st.markdown("### 💡 How to use")
     st.markdown(
         """  
-- The chart displays all three levels:  
-  - *Entrepreneurship* (inner ring)  
-  - *Field of Study* (middle ring)  
-  - *Salary Group* (outer ring)  
-- All labels include their percentage share in brackets (e.g., Engineering (20.1%))  
-- Click on any segment to zoom in and explore deeper insights.
+The chart displays all three levels:  
+
+  - Entrepreneurship (inner ring)  
+  - Field of Study (middle ring)  
+  - Salary Group (outer ring)  
+All labels include their percentage share in brackets (e.g., Engineering (20.1%))  
+Click on any segment to zoom in and explore deeper insights.
+
         """
     )
