@@ -4,12 +4,12 @@ import plotly.express as px
 
 # Set page config
 st.set_page_config(
-    page_title="Career Path Sunburst 🤯",
+    page_title="Career Path Sunburst",
     layout="wide",
-    page_icon="🤯"
+    page_icon="🌞"
 )
 
-st.title("Career Path Sunburst 🤯")
+st.title("Career Path Sunburst")
 
 @st.cache_data
 def load_data():
@@ -34,17 +34,16 @@ sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group'
 total_count = sunburst_data['Count'].sum()
 sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round(2)
 
-# Create custom labels with <br> for line break
-sunburst_data['Ent_Perc'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
-sunburst_data['Field_Perc'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
+# Add percentages to all label levels in brackets
+sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
+sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 
-sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + '<br>(' + sunburst_data['Ent_Perc'].astype(str) + '%)'
-sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '<br>(' + sunburst_data['Field_Perc'].astype(str) + '%)'
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '<br>(' + sunburst_data['Percentage'].astype(str) + '%)'
+sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Ent_Label'].astype(str) + '%)'
+sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + ' (' + sunburst_data['Field_Label'].astype(str) + '%)'
+sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + ' (' + sunburst_data['Percentage'].astype(str) + '%)'
 
 sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
 
-# Colors
 yes_fields = df[df['Entrepreneurship'] == 'Yes']['Field_of_Study'].unique()
 green_shades = px.colors.sample_colorscale("Greens", [i / max(1, len(yes_fields) - 1) for i in range(len(yes_fields))])
 yes_colors = {field: green_shades[i] for i, field in enumerate(yes_fields)}
@@ -82,10 +81,10 @@ fig = px.sunburst(
 )
 
 fig.update_traces(
-    textinfo='label+text',
     insidetextorientation='radial',
-    texttemplate='%{label}',
+    maxdepth=2,
     branchvalues="total",
+    textinfo='label+text',
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
 
@@ -101,9 +100,8 @@ with col2:
     - The chart displays all three levels:
       - *Entrepreneurship* (inner ring)  
       - *Field of Study* (middle ring)  
-      - *Salary Group* (outer ring)  
-    - All labels include their percentage in brackets on the second line using a line break  
-      *(e.g., Engineering<br>(20.1%))*
+      - *Salary Group* (outer ring)
+    - All labels include their percentage share in brackets (e.g., Engineering (20.1%))
     - Click on any segment to zoom in and explore deeper insights.
     """
     )
