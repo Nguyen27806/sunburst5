@@ -35,9 +35,9 @@ sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round
 sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 
-sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + '\n(' + sunburst_data['Ent_Label'].astype(str) + '%)'
-sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '\n(' + sunburst_data['Field_Label'].astype(str) + '%)'
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n(' + sunburst_data['Percentage'].astype(str) + '%)'
+sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Ent_Label'].astype(str) + '%)'
+sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + ' (' + sunburst_data['Field_Label'].astype(str) + '%)'
+sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + ' (' + sunburst_data['Percentage'].astype(str) + '%)'
 
 sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
 
@@ -98,7 +98,7 @@ with col2:
   - *Entrepreneurship* (inner ring)  
   - *Field of Study* (middle ring)  
   - *Salary Group* (outer ring)  
-- All labels include their percentage share on a new line (e.g., Engineering\\n(20.1%))  
+- All labels include their percentage share in brackets (e.g., Engineering (20.1%))  
 - Click on any segment to zoom in and explore deeper insights.
         """
     )
