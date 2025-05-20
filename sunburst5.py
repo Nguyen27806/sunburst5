@@ -85,6 +85,11 @@ fig.update_traces(
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
 
+fig.update_layout(
+    width=500,
+    height=500,
+    margin=dict(t=50, l=0, r=0, b=0)
+)
 col1, col2 = st.columns([3, 1])
 
 with col1:
