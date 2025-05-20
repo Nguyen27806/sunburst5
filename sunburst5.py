@@ -9,7 +9,8 @@ st.set_page_config(
     page_icon="🌞"
 )
 
-st.title("Career Path Sunburst")
+# Add icon to title
+st.title("🌞 Career Path Sunburst")
 
 @st.cache_data
 def load_data():
@@ -34,13 +35,13 @@ sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group'
 total_count = sunburst_data['Count'].sum()
 sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round(2)
 
-# Add percentages to all label levels in brackets
+# Format labels with newline before percentage
 sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
 
-sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Ent_Label'].astype(str) + '%)'
-sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + ' (' + sunburst_data['Field_Label'].astype(str) + '%)'
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + ' (' + sunburst_data['Percentage'].astype(str) + '%)'
+sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + '\n(' + sunburst_data['Ent_Label'].astype(str) + '%)'
+sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '\n(' + sunburst_data['Field_Label'].astype(str) + '%)'
+sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n(' + sunburst_data['Percentage'].astype(str) + '%)'
 
 sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
 
@@ -97,11 +98,11 @@ with col2:
     st.markdown("### 💡 How to use")
     st.markdown(
         """  
-    - The chart displays all three levels:
-      - *Entrepreneurship* (inner ring)  
-      - *Field of Study* (middle ring)  
-      - *Salary Group* (outer ring)
-    - All labels include their percentage share in brackets (e.g., Engineering (20.1%))
-    - Click on any segment to zoom in and explore deeper insights.
-    """
+- The chart displays all three levels:  
+  - *Entrepreneurship* (inner ring)  
+  - *Field of Study* (middle ring)  
+  - *Salary Group* (outer ring)  
+- All labels include their percentage share in brackets on a new line (e.g., Engineering\\n(20.1%))  
+- Click on any segment to zoom in and explore deeper insights.
+        """
     )
