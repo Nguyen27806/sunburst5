@@ -84,6 +84,13 @@ fig.update_traces(
     textinfo='label+text',
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
+
+# Enlarge the chart
+fig.update_layout(
+    margin=dict(t=50, l=10, r=10, b=10),
+    height=800
+)
+
 col1, col2 = st.columns([3, 1])
 
 with col1:
