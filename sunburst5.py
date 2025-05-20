@@ -86,8 +86,8 @@ fig.update_traces(
 )
 
 fig.update_layout(
-    width=800,
-    height=800,
+    width=500,
+    height=500,
     margin=dict(t=50, l=0, r=0, b=0)
 )
 
@@ -102,11 +102,11 @@ with col2:
         """  
 The chart displays all three levels:  
 
-*Entrepreneurship (inner ring)*  
-*Field of Study (middle ring)*  
-*Salary Group (outer ring)*  
-
+  - Entrepreneurship (inner ring)  
+  - Field of Study (middle ring)  
+  - Salary Group (outer ring)  
 All labels include their percentage share in brackets (e.g., Engineering (20.1%))  
 Click on any segment to zoom in and explore deeper insights.
+
         """
     )
