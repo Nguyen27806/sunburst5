@@ -33,7 +33,14 @@ sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group'
 
 total_count = sunburst_data['Count'].sum()
 sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round(2)
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '\n' + sunburst_data['Percentage'].astype(str) + '%'
+
+# Add percentages to all label levels in brackets
+sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
+sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
+
+sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + ' (' + sunburst_data['Ent_Label'].astype(str) + '%)'
+sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + ' (' + sunburst_data['Field_Label'].astype(str) + '%)'
+sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + ' (' + sunburst_data['Percentage'].astype(str) + '%)'
 
 sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
 
@@ -65,7 +72,7 @@ color_map['No'] = '#78c2d8'
 
 fig = px.sunburst(
     sunburst_data,
-    path=['Entrepreneurship', 'Field_of_Study', 'Salary_Label'],
+    path=['Ent_Label', 'Field_Label', 'Salary_Label'],
     values='Count',
     color='Ent_Field',
     color_discrete_map=color_map,
@@ -94,6 +101,7 @@ with col2:
       - *Entrepreneurship* (inner ring)  
       - *Field of Study* (middle ring)  
       - *Salary Group* (outer ring)
-    - To focus on specific salary details, click on a segment (e.g., Arts) to *zoom in* and explore the salary distribution for that group.
+    - All labels include their percentage share in brackets (e.g., Engineering (20.1%))
+    - Click on any segment to zoom in and explore deeper insights.
     """
     )
