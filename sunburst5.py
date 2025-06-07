@@ -82,6 +82,7 @@ fig.update_traces(
     maxdepth=2,
     branchvalues="total",
     textinfo='label+text',
+    textfont=dict(color='black'),  # 👈 đổi màu chữ thành đen
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
 
