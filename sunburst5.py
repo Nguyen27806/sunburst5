@@ -1,6 +1,6 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
+import plotly.graph_objects as go
 
 st.set_page_config(
     page_title="Career Path Sunburst",
@@ -28,92 +28,70 @@ def categorize_salary(salary):
 
 df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
+# Tính toán tổng thể cho sunburst
 sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 total_count = sunburst_data['Count'].sum()
-sunburst_data['Percentage'] = (sunburst_data['Count'] / total_count * 100).round(2)
 
-sunburst_data['Ent_Label'] = sunburst_data.groupby('Entrepreneurship')['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
-sunburst_data['Field_Label'] = sunburst_data.groupby(['Entrepreneurship', 'Field_of_Study'])['Count'].transform(lambda x: round(x.sum() / total_count * 100, 2))
+# Chuẩn bị dữ liệu theo cấu trúc hierachy cho go.Sunburst
+labels = []
+parents = []
+values = []
+text_colors = []
 
-sunburst_data['Ent_Label'] = sunburst_data['Entrepreneurship'] + '<br>' + sunburst_data['Ent_Label'].astype(str) + '%'
-sunburst_data['Field_Label'] = sunburst_data['Field_of_Study'] + '<br>' + sunburst_data['Field_Label'].astype(str) + '%'
-sunburst_data['Salary_Label'] = sunburst_data['Salary_Group'] + '<br>' + sunburst_data['Percentage'].astype(str) + '%'
+# Tạo mapping cho màu chữ riêng Field_of_Study
+white_fields_no = ['Business', 'Engineering', 'Mathematics']
+white_fields_yes = ['Medicine', 'Arts']
 
-sunburst_data['Ent_Field'] = sunburst_data['Entrepreneurship'] + " - " + sunburst_data['Field_of_Study']
+# Vòng 1: Entrepreneurship
+for ent in sunburst_data['Entrepreneurship'].unique():
+    ent_total = sunburst_data[sunburst_data['Entrepreneurship'] == ent]['Count'].sum()
+    labels.append(ent)
+    parents.append("")
+    values.append(ent_total)
+    text_colors.append("black")  # Vòng 1 luôn đen
 
-yes_fields = df[df['Entrepreneurship'] == 'Yes']['Field_of_Study'].unique()
-green_shades = px.colors.sample_colorscale("Greens", [i / max(1, len(yes_fields) - 1) for i in range(len(yes_fields))])
-yes_colors = {field: green_shades[i] for i, field in enumerate(yes_fields)}
+    # Vòng 2: Field of Study
+    sub_df = sunburst_data[sunburst_data['Entrepreneurship'] == ent]
+    for field in sub_df['Field_of_Study'].unique():
+        field_total = sub_df[sub_df['Field_of_Study'] == field]['Count'].sum()
+        labels.append(field)
+        parents.append(ent)
+        values.append(field_total)
 
-no_colors = {
-    'Engineering': '#005b96',
-    'Business': '#03396c',
-    'Arts': '#009ac7',
-    'Computer Science': '#8ed2ed',
-    'Medicine': '#b3cde0',
-    'Law': '#5dc4e1',
-    'Mathematics': '#0a70a9'
-}
-
-color_map = {}
-font_color_map = {}  # new
-
-# Cài đặt màu cho từng nhánh + font màu
-for ent in ['Yes', 'No']:
-    for field in df['Field_of_Study'].unique():
-        key = f"{ent} - {field}"
-        if ent == 'Yes':
-            color_map[key] = yes_colors.get(field, '#2ECC71')
-            if field in ['Medicine', 'Arts']:
-                font_color_map[key] = 'white'  # giữ trắng
-            else:
-                font_color_map[key] = 'black'
+        if (ent == 'Yes' and field in white_fields_yes) or (ent == 'No' and field in white_fields_no):
+            text_colors.append("white")
         else:
-            color_map[key] = no_colors.get(field, '#78c2d8')
-            if field in ['Business', 'Engineering', 'Mathematics']:
-                font_color_map[key] = 'white'  # giữ trắng
-            else:
-                font_color_map[key] = 'black'
+            text_colors.append("black")
 
-color_map['Yes'] = '#2ECC71'
-color_map['No'] = '#78c2d8'
-font_color_map['Yes'] = 'black'
-font_color_map['No'] = 'black'
+        # Vòng 3: Salary Group
+        sub_sub_df = sub_df[sub_df['Field_of_Study'] == field]
+        for _, row in sub_sub_df.iterrows():
+            salary = row['Salary_Group']
+            count = row['Count']
+            labels.append(salary)
+            parents.append(field)
+            values.append(count)
+            text_colors.append("black")  # Vòng ngoài giữ nguyên: đen hết
 
-fig = px.sunburst(
-    sunburst_data,
-    path=['Ent_Label', 'Field_Label', 'Salary_Label'],
-    values='Count',
-    color='Ent_Field',
-    color_discrete_map=color_map,
-    custom_data=['Ent_Field', 'Percentage'],
-    title='Career Path Insights: Education, Salary & Entrepreneurship'
-)
-
-# Đặt màu chữ từng nhánh theo font_color_map
-fig.update_traces(
-    insidetextorientation='radial',
-    maxdepth=2,
+# Tạo biểu đồ bằng go.Sunburst
+fig = go.Figure(go.Sunburst(
+    labels=labels,
+    parents=parents,
+    values=values,
     branchvalues="total",
-    textinfo='label+text',
-    hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[1]}%<extra></extra>',
-)
-
-# Gán màu font thủ công cho từng sector
-for i, d in enumerate(fig.data[0]['labels']):
-    try:
-        ent_field = fig.data[0]['customdata'][i][0]
-        font_color = font_color_map.get(ent_field, 'black')
-        fig.data[0]['textfont']['color'][i] = font_color
-    except:
-        fig.data[0]['textfont']['color'][i] = 'black'  # fallback
+    insidetextorientation='radial',
+    textfont=dict(color=text_colors),
+    hovertemplate='<b>%{label}</b><br>Count: %{value}<extra></extra>'
+))
 
 fig.update_layout(
-    width=500,
-    height=500,
+    title='Career Path Insights: Education, Salary & Entrepreneurship',
+    width=600,
+    height=600,
     margin=dict(t=50, l=0, r=0, b=0)
 )
 
+# Streamlit display
 col1, col2 = st.columns([3, 1])
 
 with col1:
@@ -123,13 +101,13 @@ with col2:
     st.markdown("### 💡 How to use")
     st.markdown(
         """
-- The chart displays all three levels:  
-  - *Entrepreneurship* (inner ring)  
-  - *Field of Study* (middle ring)  
-  - *Salary Group* (outer ring)  
-- Most labels are in black for readability.  
-- Exceptions (white labels for contrast) are:
-  - No: Business, Engineering, Mathematics  
+- The chart displays three layers:
+  - *Entrepreneurship* (center)
+  - *Field of Study* (middle ring)
+  - *Salary Group* (outer ring)
+- Labels are mostly black for readability.
+- **Exceptions (white text):**
+  - No: Business, Engineering, Mathematics
   - Yes: Medicine, Arts
         """
     )
