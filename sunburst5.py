@@ -28,17 +28,14 @@ def categorize_salary(salary):
 
 df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
-# Tính toán tổng thể cho sunburst
 sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
 total_count = sunburst_data['Count'].sum()
 
-# Chuẩn bị dữ liệu theo cấu trúc hierachy cho go.Sunburst
 labels = []
 parents = []
 values = []
 text_colors = []
 
-# Tạo mapping cho màu chữ riêng Field_of_Study
 white_fields_no = ['Business', 'Engineering', 'Mathematics']
 white_fields_yes = ['Medicine', 'Arts']
 
@@ -48,7 +45,7 @@ for ent in sunburst_data['Entrepreneurship'].unique():
     labels.append(ent)
     parents.append("")
     values.append(ent_total)
-    text_colors.append("black")  # Vòng 1 luôn đen
+    text_colors.append("black")  # Trung tâm: màu đen
 
     # Vòng 2: Field of Study
     sub_df = sunburst_data[sunburst_data['Entrepreneurship'] == ent]
@@ -71,9 +68,9 @@ for ent in sunburst_data['Entrepreneurship'].unique():
             labels.append(salary)
             parents.append(field)
             values.append(count)
-            text_colors.append("black")  # Vòng ngoài giữ nguyên: đen hết
+            text_colors.append("black")  # Vòng ngoài: luôn đen
 
-# Tạo biểu đồ bằng go.Sunburst
+# Vẽ biểu đồ Sunburst với màu chữ tùy chỉnh
 fig = go.Figure(go.Sunburst(
     labels=labels,
     parents=parents,
@@ -86,12 +83,10 @@ fig = go.Figure(go.Sunburst(
 
 fig.update_layout(
     title='Career Path Insights: Education, Salary & Entrepreneurship',
-    width=600,
-    height=600,
     margin=dict(t=50, l=0, r=0, b=0)
 )
 
-# Streamlit display
+# Hiển thị với chiều rộng toàn phần
 col1, col2 = st.columns([3, 1])
 
 with col1:
