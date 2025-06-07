@@ -56,16 +56,29 @@ no_colors = {
 }
 
 color_map = {}
+font_color_map = {}  # new
+
+# Cài đặt màu cho từng nhánh + font màu
 for ent in ['Yes', 'No']:
     for field in df['Field_of_Study'].unique():
         key = f"{ent} - {field}"
         if ent == 'Yes':
             color_map[key] = yes_colors.get(field, '#2ECC71')
+            if field in ['Medicine', 'Arts']:
+                font_color_map[key] = 'white'  # giữ trắng
+            else:
+                font_color_map[key] = 'black'
         else:
             color_map[key] = no_colors.get(field, '#78c2d8')
+            if field in ['Business', 'Engineering', 'Mathematics']:
+                font_color_map[key] = 'white'  # giữ trắng
+            else:
+                font_color_map[key] = 'black'
 
 color_map['Yes'] = '#2ECC71'
 color_map['No'] = '#78c2d8'
+font_color_map['Yes'] = 'black'
+font_color_map['No'] = 'black'
 
 fig = px.sunburst(
     sunburst_data,
@@ -73,18 +86,27 @@ fig = px.sunburst(
     values='Count',
     color='Ent_Field',
     color_discrete_map=color_map,
-    custom_data=['Percentage'],
+    custom_data=['Ent_Field', 'Percentage'],
     title='Career Path Insights: Education, Salary & Entrepreneurship'
 )
 
+# Đặt màu chữ từng nhánh theo font_color_map
 fig.update_traces(
     insidetextorientation='radial',
     maxdepth=2,
     branchvalues="total",
     textinfo='label+text',
-    textfont=dict(color='white'),  # giữ màu trắng cho label
-    hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
+    hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[1]}%<extra></extra>',
 )
+
+# Gán màu font thủ công cho từng sector
+for i, d in enumerate(fig.data[0]['labels']):
+    try:
+        ent_field = fig.data[0]['customdata'][i][0]
+        font_color = font_color_map.get(ent_field, 'black')
+        fig.data[0]['textfont']['color'][i] = font_color
+    except:
+        fig.data[0]['textfont']['color'][i] = 'black'  # fallback
 
 fig.update_layout(
     width=500,
@@ -105,31 +127,9 @@ with col2:
   - *Entrepreneurship* (inner ring)  
   - *Field of Study* (middle ring)  
   - *Salary Group* (outer ring)  
-- All labels include their percentage share in brackets (e.g., Engineering (20.1%))  
-- Click on any segment to zoom in and explore deeper insights.
+- Most labels are in black for readability.  
+- Exceptions (white labels for contrast) are:
+  - No: Business, Engineering, Mathematics  
+  - Yes: Medicine, Arts
         """
     )
-
-# ==============================
-# EXTRA: Show code with black comments
-# ==============================
-
-st.markdown("""
-<hr>
-<h4 style="color:white;">🔧 Code Preview (with black comments)</h4>
-
-<style>
-span.comment { color: black !important; }
-span.keyword { color: white; font-weight: bold; }
-span.normal { color: white; }
-</style>
-
-<pre>
-<span class="keyword">import</span> streamlit <span class="keyword">as</span> st   <span class="comment"># Load Streamlit</span>
-<span class="keyword">import</span> pandas <span class="keyword">as</span> pd       <span class="comment"># Data handling</span>
-<span class="keyword">import</span> plotly.express <span class="keyword">as</span> px  <span class="comment"># Plotting</span>
-
-<span class="normal">... (truncated for brevity)</span>
-</pre>
-""", unsafe_allow_html=True)
-
