@@ -49,9 +49,9 @@ no_colors = {
     'Engineering': '#005b96',
     'Business': '#03396c',
     'Arts': '#009ac7',
-    'Computer Science': '#1c2128',
-    'Medicine': '#1c2128',
-    'Law': '#1c2128',
+    'Computer Science': '#8ed2ed',
+    'Medicine': '#b3cde0',
+    'Law': '#5dc4e1',
     'Mathematics': '#0a70a9'
 }
 
@@ -108,4 +108,3 @@ with col2:
 - Click on any segment to zoom in and explore deeper insights.
         """
     )
-
