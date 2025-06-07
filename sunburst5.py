@@ -82,7 +82,7 @@ fig.update_traces(
     maxdepth=2,
     branchvalues="total",
     textinfo='label+text',
-    textfont=dict(color='black'),  # 👈 đổi màu chữ thành đen
+    textfont=dict(color='white'),  # giữ màu trắng cho label
     hovertemplate='<b>%{label}</b><br>Percentage: %{customdata[0]}%<extra></extra>'
 )
 
@@ -109,3 +109,27 @@ with col2:
 - Click on any segment to zoom in and explore deeper insights.
         """
     )
+
+# ==============================
+# EXTRA: Show code with black comments
+# ==============================
+
+st.markdown("""
+<hr>
+<h4 style="color:white;">🔧 Code Preview (with black comments)</h4>
+
+<style>
+span.comment { color: black !important; }
+span.keyword { color: white; font-weight: bold; }
+span.normal { color: white; }
+</style>
+
+<pre>
+<span class="keyword">import</span> streamlit <span class="keyword">as</span> st   <span class="comment"># Load Streamlit</span>
+<span class="keyword">import</span> pandas <span class="keyword">as</span> pd       <span class="comment"># Data handling</span>
+<span class="keyword">import</span> plotly.express <span class="keyword">as</span> px  <span class="comment"># Plotting</span>
+
+<span class="normal">... (truncated for brevity)</span>
+</pre>
+""", unsafe_allow_html=True)
+
