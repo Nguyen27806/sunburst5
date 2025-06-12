@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
 
+# Cấu hình trang
 st.set_page_config(
     page_title="Career Path Sunburst",
     layout="wide",
@@ -10,14 +11,26 @@ st.set_page_config(
 
 st.title("🌞 Career Path Sunburst")
 
+# Tải dữ liệu
 @st.cache_data
 def load_data():
     return pd.read_excel("education_career_success.xlsx", sheet_name=0)
 
+# Gọi và hiển thị dữ liệu
 df = load_data()
+st.subheader("📊 Sample of Data")
+st.write(df.head())
+st.write("📋 Data Types:")
+st.write(df.dtypes)
 
+# Ép kiểu nếu cần
+df['Starting_Salary'] = pd.to_numeric(df['Starting_Salary'], errors='coerce')
+
+# Hàm phân loại lương
 def categorize_salary(salary):
-    if salary < 30000:
+    if pd.isnull(salary):
+        return 'Unknown'
+    elif salary < 30000:
         return '<30K'
     elif salary < 50000:
         return '30K–50K'
@@ -26,11 +39,15 @@ def categorize_salary(salary):
     else:
         return '70K+'
 
+# Tạo cột phân nhóm
 df['Salary_Group'] = df['Starting_Salary'].apply(categorize_salary)
 
+# Tạo dữ liệu cho sunburst
 sunburst_data = df.groupby(['Entrepreneurship', 'Field_of_Study', 'Salary_Group']).size().reset_index(name='Count')
-total_count = sunburst_data['Count'].sum()
+st.subheader("📂 Grouped Data")
+st.write(sunburst_data)
 
+# Danh sách cho biểu đồ
 labels = []
 parents = []
 values = []
@@ -39,15 +56,15 @@ text_colors = []
 white_fields_no = ['Business', 'Engineering', 'Mathematics']
 white_fields_yes = ['Medicine', 'Arts']
 
-# Vòng 1: Entrepreneurship
+# Level 1: Entrepreneurship
 for ent in sunburst_data['Entrepreneurship'].unique():
     ent_total = sunburst_data[sunburst_data['Entrepreneurship'] == ent]['Count'].sum()
     labels.append(ent)
     parents.append("")
     values.append(ent_total)
-    text_colors.append("black")  # Trung tâm: màu đen
+    text_colors.append("black")
 
-    # Vòng 2: Field of Study
+    # Level 2: Field of Study
     sub_df = sunburst_data[sunburst_data['Entrepreneurship'] == ent]
     for field in sub_df['Field_of_Study'].unique():
         field_total = sub_df[sub_df['Field_of_Study'] == field]['Count'].sum()
@@ -60,7 +77,7 @@ for ent in sunburst_data['Entrepreneurship'].unique():
         else:
             text_colors.append("black")
 
-        # Vòng 3: Salary Group
+        # Level 3: Salary Group
         sub_sub_df = sub_df[sub_df['Field_of_Study'] == field]
         for _, row in sub_sub_df.iterrows():
             salary = row['Salary_Group']
@@ -68,17 +85,18 @@ for ent in sunburst_data['Entrepreneurship'].unique():
             labels.append(salary)
             parents.append(field)
             values.append(count)
-            text_colors.append("black")  # Vòng ngoài: luôn đen
+            text_colors.append("black")  # Luôn đen ngoài cùng
 
-# Vẽ biểu đồ Sunburst với màu chữ tùy chỉnh
+# Vẽ biểu đồ sunburst
 fig = go.Figure(go.Sunburst(
     labels=labels,
     parents=parents,
     values=values,
     branchvalues="total",
     insidetextorientation='radial',
-    textfont=dict(color=text_colors),
-    hovertemplate='<b>%{label}</b><br>Count: %{value}<extra></extra>'
+    hovertemplate='<b>%{label}</b><br>Count: %{value}<extra></extra>',
+    # Có thể thử bỏ dòng dưới nếu gây lỗi
+    textfont=dict(color=text_colors)
 ))
 
 fig.update_layout(
@@ -86,7 +104,7 @@ fig.update_layout(
     margin=dict(t=50, l=0, r=0, b=0)
 )
 
-# Hiển thị với chiều rộng toàn phần
+# Layout chia cột
 col1, col2 = st.columns([3, 1])
 
 with col1:
